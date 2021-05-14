@@ -77,6 +77,16 @@ function App() {
     }
   };
 
+  //Ability to delete a tenant
+  const deleteTenant = async (id) => {
+    try {
+      await Service.deleteTenant(id);
+      fetchTenantsData();
+    } catch (e) {
+      alert('Error deleting tenant id, try again please ', e);
+    }
+  };
+
   return (
     <>
       <div className="container">
@@ -126,7 +136,12 @@ function App() {
                   <td> {tenant.paymentStatus} </td>
                   <td> {new Date(tenant.leaseEndDate).toISOString().split('T')[0]} </td>
                   <td>
-                    <button className="btn btn-danger">Delete</button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => deleteTenant(tenant.id)}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               )
