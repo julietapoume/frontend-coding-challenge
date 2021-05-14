@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Service } from './Service';
 
+const Filter = {
+  status: 'status',
+  date: 'date',
+};
+
+const PaymentStatus = {
+  current: 'CURRENT',
+  late: 'LATE',
+};
+
 function App() {
 
   //Populate the list with data from `Service.getTenants`.
@@ -18,19 +28,60 @@ function App() {
     fetchTenantsData();
   }, []);
 
+  //Ability to filter the list
+  const [filter, setFilter] = useState();
+  const filterByPaymentStatus = (status) => {
+    return tenants.filter((tenant => tenant.paymentStatus === status));
+
+  };
+  const filterByMonth = () => {
+    const subtractDays = (date, days) => {
+      date.setDate(date.getDate() + days);
+      return date;
+    };
+    const d = new Date();
+    var lastMonth = subtractDays(d, -30);
+    return tenants.filter((tenant => new Date(tenant.leaseEndDate) > lastMonth));
+  };
+  const getTenantsFiltered = () => {
+    switch (filter) {
+      case Filter.status:
+        return filterByPaymentStatus(PaymentStatus.late);
+      case Filter.date:
+        return filterByMonth();
+      default:
+        return tenants;
+    }
+  };
+
   return (
     <>
       <div className="container">
         <h1>Tenants</h1>
         <ul className="nav nav-tabs">
           <li className="nav-item">
-            <a className="nav-link active" href="#">All</a>
+            <button
+              className="nav-link active"
+              onClick={() => setFilter()}
+            >
+              All
+            </button>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="#">Payment is late</a>
+            <button
+              className="nav-link"
+              onClick={() => setFilter(Filter.status)}
+            >
+              Payment is late
+            </button>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="#">Lease ends in less than a month</a>
+            <button
+              className="nav-link"
+              onClick={() => setFilter(Filter.date)}
+            >
+              Lease ends in less than a month
+            </button>
           </li>
         </ul>
         <table className="table">
@@ -45,7 +96,7 @@ function App() {
           </thead>
           <tbody>
             {
-              tenants.map((tenant) =>
+              getTenantsFiltered().map((tenant) =>
                 <tr key={tenant.id}>
                   <th> {tenant.id} </th>
                   <td> {tenant.name} </td>
