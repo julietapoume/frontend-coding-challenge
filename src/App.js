@@ -61,6 +61,22 @@ function App() {
     setTenants(sortedTenants);
   }
 
+  //Ability to add a tenant
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('CURRENT');
+  const date = new Date().toISOString().split('T')[0];
+  const [leaseEndDate, setLeaseEndDate] = useState(date);
+  const saveTenantData = async (name, paymentStatus, leaseEndDate) => {
+    try {
+      await Service.addTenant({ name, paymentStatus, leaseEndDate });
+      fetchTenantsData();
+      setShowForm(false);
+    } catch (e) {
+      alert('Error adding a new tenant, try again please');
+    }
+  };
+
   return (
     <>
       <div className="container">
@@ -119,33 +135,66 @@ function App() {
         </table>
       </div>
       <div className="container">
-        <button className="btn btn-secondary">Add Tenant</button>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowForm(true)}
+        >
+          Add Tenant
+        </button>
       </div>
       <div className="container">
-        <form>
-          <div className="form-group">
-            <label>Name</label>
-            <input className="form-control" />
-          </div>
-          <div className="form-group">
-            <label>Payment Status</label>
-            <select className="form-control">
-              <option>CURRENT</option>
-              <option>LATE</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Lease End Date</label>
-            <input className="form-control" />
-          </div>
-          <button className="btn btn-primary">Save</button>
-          <button className="btn">Cancel</button>
-        </form>
-        {error &&
-          <span>
-            Error loading data, please refresh the page.
-          </span>
+        {showForm &&
+          <form>
+            <div className="form-group">
+              <label>Name</label>
+              <input
+                className="form-control"
+                type="text"
+                maxLength="25"
+                onChange={(event) => { setName(event.target.value) }}
+              />
+            </div>
+            <div className="form-group">
+              <label>Payment Status</label>
+              <select
+                className="form-control"
+                onChange={(event) => { setPaymentStatus(event.target.value) }}
+              >
+                <option>CURRENT</option>
+                <option>LATE</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Lease End Date</label>
+              <input
+                className="form-control"
+                type="date"
+                min={date}
+                defaultValue={date}
+                onChange={(event) => { setLeaseEndDate(event.target.value) }}
+              />
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={(event) => {
+                event.preventDefault();
+                saveTenantData(name, paymentStatus, leaseEndDate)
+              }}> Save </button>
+            <button
+              className="btn"
+              onClick={(event) => {
+                event.preventDefault();
+                setShowForm(false);
+              }}> Cancel </button>
+          </form>
         }
+        <div>
+          {error &&
+            <span>
+              Error loading data, please refresh the page.
+            </span>
+          }
+        </div>
       </div>
     </>
   );
