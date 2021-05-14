@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Service } from './Service';
+import TenantForm from './TenantForm';
 
 const Filter = {
+  all: 'all',
   status: 'status',
   date: 'date',
 };
@@ -54,6 +56,17 @@ function App() {
     }
   };
 
+  const getActiveTag = () => {
+    switch (filter) {
+      case Filter.status:
+        return Filter.status;
+      case Filter.date:
+        return Filter.date;
+      default:
+        return Filter.all;
+    }
+  }
+
   //Ability to sort the list
   const sortTenants = (propName) => {
     let sortedTenants = [...tenants];
@@ -63,10 +76,6 @@ function App() {
 
   //Ability to add a tenant
   const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('CURRENT');
-  const date = new Date().toISOString().split('T')[0];
-  const [leaseEndDate, setLeaseEndDate] = useState(date);
   const saveTenantData = async (name, paymentStatus, leaseEndDate) => {
     try {
       await Service.addTenant({ name, paymentStatus, leaseEndDate });
@@ -94,7 +103,7 @@ function App() {
         <ul className="nav nav-tabs">
           <li className="nav-item">
             <button
-              className="nav-link active"
+              className={getActiveTag() === Filter.all ? ' nav-link active' : 'nav-link'}
               onClick={() => setFilter()}
             >
               All
@@ -102,7 +111,7 @@ function App() {
           </li>
           <li className="nav-item">
             <button
-              className="nav-link"
+              className={getActiveTag() === Filter.status ? ' nav-link active' : 'nav-link'}
               onClick={() => setFilter(Filter.status)}
             >
               Payment is late
@@ -110,7 +119,7 @@ function App() {
           </li>
           <li className="nav-item">
             <button
-              className="nav-link"
+              className={getActiveTag() === Filter.date ? ' nav-link active' : 'nav-link'}
               onClick={() => setFilter(Filter.date)}
             >
               Lease ends in less than a month
@@ -158,51 +167,11 @@ function App() {
         </button>
       </div>
       <div className="container">
-        {showForm &&
-          <form>
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                className="form-control"
-                type="text"
-                maxLength="25"
-                onChange={(event) => { setName(event.target.value) }}
-              />
-            </div>
-            <div className="form-group">
-              <label>Payment Status</label>
-              <select
-                className="form-control"
-                onChange={(event) => { setPaymentStatus(event.target.value) }}
-              >
-                <option>CURRENT</option>
-                <option>LATE</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Lease End Date</label>
-              <input
-                className="form-control"
-                type="date"
-                min={date}
-                defaultValue={date}
-                onChange={(event) => { setLeaseEndDate(event.target.value) }}
-              />
-            </div>
-            <button
-              className="btn btn-primary"
-              onClick={(event) => {
-                event.preventDefault();
-                saveTenantData(name, paymentStatus, leaseEndDate)
-              }}> Save </button>
-            <button
-              className="btn"
-              onClick={(event) => {
-                event.preventDefault();
-                setShowForm(false);
-              }}> Cancel </button>
-          </form>
-        }
+        <TenantForm
+          showForm={showForm}
+          setShowForm={setShowForm}
+          saveTenantData={saveTenantData}
+        />
         <div>
           {error &&
             <span>
