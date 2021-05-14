@@ -54,6 +54,13 @@ function App() {
     }
   };
 
+  //Ability to sort the list
+  const sortTenants = (propName) => {
+    let sortedTenants = [...tenants];
+    sortedTenants = sortedTenants.sort((a, b) => (a[propName] > b[propName]) ? 1 : -1);
+    setTenants(sortedTenants);
+  }
+
   return (
     <>
       <div className="container">
@@ -88,9 +95,9 @@ function App() {
           <thead>
             <tr>
               <th>#</th>
-              <th>Name</th>
-              <th>Payment Status</th>
-              <th>Lease End Date</th>
+              <th onClick={() => sortTenants("name")}>Name</th>
+              <th onClick={() => sortTenants("paymentStatus")}>Payment Status</th>
+              <th onClick={() => sortTenants("leaseEndDate")}>Lease End Date</th>
               <th>Actions</th>
             </tr>
           </thead>
